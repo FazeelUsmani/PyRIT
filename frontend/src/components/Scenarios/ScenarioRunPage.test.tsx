@@ -43,6 +43,9 @@ jest.mock('@/services/api', () => ({
     cancelRun: jest.fn(),
     resumeRun: jest.fn(),
     getRunProgress: jest.fn(),
+    // The hierarchy section has its own tests; keep it loading so these tests cover the rest of the page.
+    getRunHierarchy: jest.fn(() => new Promise(() => {})),
+    getRunHierarchyNode: jest.fn(),
   },
 }))
 
@@ -687,6 +690,7 @@ describe('ScenarioRunPage', () => {
       'Overall progress',
       'Paired outcomes',
       'Atomic attack groups',
+      'Result hierarchy',
       'Objective Scorer',
       'Techniques',
       'Objectives',
@@ -1217,6 +1221,49 @@ describe('ScenarioRunPage', () => {
       act(() => { jest.runOnlyPendingTimers() })
       jest.useRealTimers()
     }
+  })
+
+  it('opens details for a hierarchy result that the progress feed has not delivered yet', async () => {
+    const user = userEvent.setup()
+    const hierarchyOnly = {
+      attack_result_id: 'hierarchy-only',
+      conversation_id: 'conversation-h',
+      result_role: 'orchestration',
+      atomic_attack_name: 'sequential-parent',
+      atomic_group_id: 'atomic-1',
+      seed_group_id: 'seed-unplanned',
+      objective: 'Objective carried by the hierarchy node',
+      outcome: 'failure',
+      execution_time_ms: 1200,
+      executed_turns: 0,
+      timestamp: '2026-01-01T00:00:00Z',
+      total_retries: 0,
+      retries: [],
+      retries_truncated: false,
+      child_attack_result_ids: [],
+      child_references_truncated: false,
+      children: [],
+      children_truncated: false,
+      child_offset: 0,
+      unresolved_child_attack_result_ids: [],
+      unresolved_child_references_truncated: false,
+      conversations: [],
+      conversations_truncated: false,
+    }
+    const counts = { completed: 1, planned: 1, succeeded: 0, success_percentage: 0, errors: 0, retries: 0 }
+    ;(scenariosApi.getRunHierarchy as jest.Mock).mockResolvedValueOnce({
+      groups: [{ atomic_group_id: 'atomic-1', atomic_attack_name: 'a', display_group: 'Group', roots: [hierarchyOnly], counts }],
+      overall_counts: counts,
+      diagnostics: { rootless_results_count: 0 },
+      truncated: false,
+      has_more: false,
+    })
+    renderPage()
+
+    await user.click(await screen.findByRole('button', { name: 'Open details for sequential-parent: Objective carried by the hierarchy node' }))
+
+    const dialog = await screen.findByRole('dialog', { name: 'sequential-parent' })
+    expect(within(dialog).getByText('Objective carried by the hierarchy node')).toBeInTheDocument()
   })
 
   it('shows descriptive technique details without result metrics', async () => {
