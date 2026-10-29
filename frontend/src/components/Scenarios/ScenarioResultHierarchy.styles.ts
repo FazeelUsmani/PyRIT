@@ -1,6 +1,6 @@
 import { makeStyles, tokens } from '@fluentui/react-components'
 
-import { NARROW_VIEWPORT_QUERY, mobileTouchTarget } from '@/styles/touchTargets'
+import { mobileTouchTarget } from '@/styles/touchTargets'
 
 export const useScenarioResultHierarchyStyles = makeStyles({
   root: {
@@ -23,31 +23,37 @@ export const useScenarioResultHierarchyStyles = makeStyles({
     gap: tokens.spacingVerticalXS,
     paddingTop: tokens.spacingVerticalS,
     borderTop: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
-  },
-  tree: {
-    listStyleType: 'none',
-    margin: 0,
-    paddingLeft: 0,
-  },
-  subtree: {
-    listStyleType: 'none',
-    margin: 0,
-    paddingLeft: tokens.spacingHorizontalXXL,
-    borderLeft: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
-    [NARROW_VIEWPORT_QUERY]: {
-      paddingLeft: tokens.spacingHorizontalM,
-    },
-  },
-  row: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: tokens.spacingHorizontalS,
-    paddingTop: tokens.spacingVerticalXXS,
-    paddingBottom: tokens.spacingVerticalXXS,
     minWidth: 0,
   },
+  // Wide tables scroll inside their own box instead of widening the page on narrow screens.
+  tableScroll: {
+    width: '100%',
+    overflowX: 'auto',
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRadius: tokens.borderRadiusLarge,
+    backgroundColor: tokens.colorNeutralBackground1,
+  },
+  table: {
+    minWidth: '52rem',
+    tableLayout: 'auto',
+  },
+  resultCell: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalS,
+    minWidth: '18rem',
+  },
+  outcomeCell: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: tokens.spacingVerticalXXS,
+  },
+  nowrap: {
+    whiteSpace: 'nowrap',
+  },
   expandButton: {
+    flexShrink: 0,
     ...mobileTouchTarget,
   },
   expandSpacer: {
@@ -61,8 +67,6 @@ export const useScenarioResultHierarchyStyles = makeStyles({
   },
   objective: {
     minWidth: 0,
-    flexBasis: '16rem',
-    flexGrow: 1,
     overflowWrap: 'anywhere',
   },
   unresolved: {

@@ -22,10 +22,13 @@ test('browses a compound result through the real API, page by page, with stable 
   await section.getByRole('button', { name: 'Expand children of sequential: Sequential parent' }).click()
   expect((await firstPage).status()).toBe(200)
 
-  const children = section.getByRole('list', { name: 'Children of sequential: Sequential parent' })
-  await expect(children.getByText('Step 1', { exact: true })).toBeVisible()
-  await expect(children.locator('li', { hasText: '#2' }).first()).toContainText('Unresolved reference')
-  await expect(children.locator('li', { hasText: '#4' }).first()).toContainText('Unresolved reference')
+  const table = section.getByRole('table', { name: 'Sequential saved results' })
+  const row = (text: string) => table.getByRole('row').filter({ hasText: text }).first()
+  await expect(table.getByText('Step 1', { exact: true })).toBeVisible()
+  await expect(row('#2')).toContainText('Unresolved reference')
+  await expect(row('#4')).toContainText('Unresolved reference')
+  // Children keep the parent's columns: outcome text sits under "Attack outcome", not nested in the row.
+  await expect(row('Step 5').getByRole('cell').nth(2)).toHaveText('Success')
   await expect(section.getByText('Showing 200 of 520 saved children')).toBeVisible()
 
   for (const shown of [400, 520]) {
@@ -35,10 +38,10 @@ test('browses a compound result through the real API, page by page, with stable 
     await expect(section.getByText(`Showing ${shown} of 520 saved children`)).toBeVisible()
   }
   await expect(section.getByRole('button', { name: 'Load more children' })).toHaveCount(0)
-  await expect(children.getByText('Step 520', { exact: true })).toBeVisible()
+  await expect(table.getByText('Step 520', { exact: true })).toBeVisible()
 
-  await children.getByRole('button', { name: 'Expand children of #1 sequential: Step 1' }).click()
-  await expect(children.getByText('Nested step 2', { exact: true })).toBeVisible()
+  await table.getByRole('button', { name: 'Expand children of #1 sequential: Step 1' }).click()
+  await expect(table.getByText('Nested step 2', { exact: true })).toBeVisible()
   expect(await totals.textContent()).toBe(before)
 
   await section.getByRole('button', { name: 'Open details for single: Single-turn attempt' }).click()

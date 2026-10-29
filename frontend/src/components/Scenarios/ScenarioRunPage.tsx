@@ -657,6 +657,7 @@ function ScenarioRunPageContent({ scenarioResultId, attackResultId }: ScenarioRu
           <ScenarioResultHierarchy
             key={scenarioResultId}
             scenarioResultId={scenarioResultId}
+            runStatus={run.status}
             onOpenResult={openResultDetails}
           />
         </section>
@@ -815,7 +816,10 @@ function ScenarioRunPageContent({ scenarioResultId, attackResultId }: ScenarioRu
                   attempt={selectedAttempt}
                   objective={
                     seedObjectives.get(selectedAttempt.seed_group_id) ??
-                    (selectedAttempt === hierarchySelection ? hierarchySelection.objective : null)
+                    // The progress row for this result carries no objective; the hierarchy node does.
+                    (hierarchySelection?.attack_result_id === selectedAttempt.attack_result_id
+                      ? hierarchySelection.objective
+                      : null)
                   }
                   atomicGroup={selectedAttemptGroup}
                   techniqueDetails={progressAtomicGroups.get(selectedAttempt.atomic_group_id)?.technique_details}
